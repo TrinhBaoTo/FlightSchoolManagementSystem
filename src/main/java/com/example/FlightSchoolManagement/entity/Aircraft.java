@@ -1,6 +1,7 @@
+package com.example.FlightSchoolManagement.entity;
+
 import jakarta.persistence.*;
 
-import javax.persistence.*;
 import java.util.Date;
 
 @Entity
@@ -37,7 +38,7 @@ public class Aircraft {
     }
 
     public Aircraft(int registrationNumber, String model, Manufacturer manufacturer, int yearManufactured,
-                    Date purchaseDate, double purchasePrice, boolean availability) {
+                    Date purchaseDate, double purchasePrice, int availability) {
         this.registrationNumber = registrationNumber;
         this.model = model;
         this.manufacturer = manufacturer;

@@ -1,4 +1,6 @@
-import javax.persistence.*;
+package com.example.FlightSchoolManagement.entity;
+
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "payment_method")

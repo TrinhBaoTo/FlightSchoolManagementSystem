@@ -1,4 +1,6 @@
-import javax.persistence.*;
+package com.example.FlightSchoolManagement.entity;
+
+import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
@@ -25,7 +27,7 @@ public class User {
     private int phoneNumber;
 
     @Column(name = "active", nullable = false)
-    private boolean active;
+    private int active;
 
     @Column(name = "activation_key", nullable = false)
     private String activationKey;
@@ -47,7 +49,7 @@ public class User {
 
     }
 
-    public User(String firstName, String lastName, String email, String password, int phoneNumber, boolean active,
+    public User(String firstName, String lastName, String email, String password, int phoneNumber, int active,
                 String activationKey, String rememberToken, Date createdAt, Date updatedAt, Certificate certificate) {
         this.firstName = firstName;
         this.lastName = lastName;

@@ -1,4 +1,6 @@
-import javax.persistence.*;
+package com.example.FlightSchoolManagement.entity;
+
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "permissions_role")
@@ -12,10 +14,10 @@ public class PermissionsRole{
     @Column(name = "role_id", nullable = false)
     private int roleId;
 
-    public PaymentMethod() {
+    public PermissionsRole() {
     }
 
-    public PaymentMethod(int roleId) {
+    public PermissionsRole(int roleId) {
         this.roleId = roleId;
     }
 }
