@@ -1,6 +1,7 @@
 package com.example.FlightSchoolManagement.entity;
 
 import jakarta.persistence.*;
+import java.time.Instant;
 import java.util.Date;
 
 @Entity

@@ -1,4 +1,4 @@
-package com.example.FlightSchoolManagementSystem;
+package com.example.FlightSchoolManagement.controller;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

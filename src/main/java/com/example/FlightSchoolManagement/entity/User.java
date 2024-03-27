@@ -29,20 +29,17 @@ public class User {
     @Column(name = "active", nullable = false)
     private int active;
 
-    @Column(name = "activation_key", nullable = false)
-    private String activationKey;
-
     @Column(name = "remember_token", nullable = false)
     private String rememberToken;
 
     @Column(name = "created_at", nullable = false)
-    private Date createdAt;
+    private Date  createdAt;
 
-    @Column(name = "updated_at", nullable = false)
-    private Date updatedAt;
+    @Column(name = "updated_at", nullable = true)
+    private Date  updatedAt;
 
     @ManyToOne
-    @JoinColumn(name = "certificate_id", nullable = false)
+    @JoinColumn(name = "certificate_id", nullable = true)
     private Certificate certificate;
 
     public User() {
@@ -50,14 +47,13 @@ public class User {
     }
 
     public User(String firstName, String lastName, String email, String password, int phoneNumber, int active,
-                String activationKey, String rememberToken, Date createdAt, Date updatedAt, Certificate certificate) {
+                String rememberToken, Date  createdAt, Date updatedAt, Certificate certificate) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.password = password;
         this.phoneNumber = phoneNumber;
         this.active = active;
-        this.activationKey = activationKey;
         this.rememberToken = rememberToken;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;

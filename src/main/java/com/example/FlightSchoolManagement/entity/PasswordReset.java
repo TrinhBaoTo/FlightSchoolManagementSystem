@@ -18,5 +18,7 @@ public class PasswordReset {
     public PasswordReset(int userId, String token) {
         this.userId = userId;
         this.token = token;
+
+
     }
 }

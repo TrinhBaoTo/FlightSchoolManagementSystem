@@ -1,58 +1,108 @@
-package com.example.FlightSchoolManagementSystem;
+package com.example.FlightSchoolManagement.controller;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
+
+import com.example.FlightSchoolManagement.entity.Airport;
+import com.example.FlightSchoolManagement.entity.Certificate;
+import com.example.FlightSchoolManagement.entity.User;
+import com.example.FlightSchoolManagement.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import io.jsonwebtoken.Jwts;
+import java.time.Instant;
+import java.util.Date;
+import java.util.UUID;
+
 @RestController
 public class UserController {
 
-    // User Storage: Map ID-name
-    private Map<Integer, String> users = new HashMap<>();
+    @Autowired
+    UserRepository userRepository;
 
-    // GET to retrieve all users
+    // GET to retrieve all or user by email
     @GetMapping("/users")
-    public Map<Integer, String> getUsers(){
-        return users;
+    public ResponseEntity<List<User>> getUsers(@RequestParam String email){
+
+        try {
+            List<User> users = new ArrayList<User>();
+
+            if (email == null){
+                userRepository.findAll().forEach(users::add);
+
+            } else{
+                userRepository.findByEmail(email).forEach(users::add);
+            }
+
+            if (users.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            return new ResponseEntity<>(users, HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    // GET: retrieve a specific user by ID
-    @GetMapping("/users/{id}")
-    public String getUserById(@PathVariable Integer id) {
-        return users.get(id);
-    }
 
-    // POST: add a new user
-    @PostMapping
-    public String addUser(@RequestParam Integer id, @RequestParam String name) {
-        users.put(id, name);
-        return "User added successfully";
+    // POST: add a new user {role} S-student; I-instructor
+    @PostMapping("/users/{role}")
+    public ResponseEntity<User> addUser(@RequestParam String firstName, @RequestParam String lastName, @RequestParam String email,
+                          @RequestParam String password, @RequestParam int phoneNumber, @PathVariable String role,
+                          @RequestParam String certificationType, @RequestParam Date certificationExpiryDate) {
+        try {
+
+            int active = 1;
+
+            String rememberToken = Jwts.builder()
+                    .claim("email", email)
+                    .setSubject(firstName)
+                    .setIssuedAt(Date.from(Instant.now()))
+                    .compact();
+
+            Date  createdAt = Date.from(Instant.now());
+            Date  updatedAt = Date.from(Instant.now());
+
+            Certificate _certificate;
+
+            if(role == "I"){
+                _certificate = new Certificate( Date.from(Instant.now()),  certificationType,  certificationExpiryDate);
+            }else{
+                _certificate = null;
+            }
+
+            User _user = new User(firstName, lastName, email, password, phoneNumber, active,
+                    rememberToken, createdAt, updatedAt, _certificate);
+
+            userRepository.save(_user);
+
+            return new ResponseEntity<>(_user, HttpStatus.OK);
+
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     // PUT: update an existing user
     @PutMapping("/users/{id}")
     public String updateUser(@PathVariable Integer id, @RequestParam String name) {
-        if (users.containsKey(id)) {
-            users.put(id, name);
+
             return "User updated successfully";
-        } else {
-            return "User not found";
-        }
+
     }
 
     // DELETE: delete a user by ID
     @DeleteMapping("/users/{id}")
     public String deleteUser(@PathVariable Integer id) {
-        if (users.containsKey(id)) {
-            users.remove(id);
+
             return "User deleted successfully";
-        } else {
-            return "User not found";
-        }
+
     }
 
     // TRACE: testing purposes (echo server)
