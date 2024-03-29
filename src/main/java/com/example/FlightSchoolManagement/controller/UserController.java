@@ -2,10 +2,12 @@ package com.example.FlightSchoolManagement.controller;
 
 import java.util.*;
 
-
 import com.example.FlightSchoolManagement.entity.Airport;
 import com.example.FlightSchoolManagement.entity.Certificate;
+import com.example.FlightSchoolManagement.entity.RoleUser;
 import com.example.FlightSchoolManagement.entity.User;
+import com.example.FlightSchoolManagement.repository.RoleRepository;
+import com.example.FlightSchoolManagement.repository.RoleUserRepository;
 import com.example.FlightSchoolManagement.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -23,6 +25,13 @@ public class UserController {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    RoleUserRepository roleUserRepository;
+
+    @Autowired
+    RoleRepository roleRepository;
+
 
     // GET to retrieve all or user by email
     @GetMapping("/users")
@@ -50,17 +59,19 @@ public class UserController {
     }
 
 
-    // POST: add a new user {role} S-student; I-instructor
-    @PostMapping("/users/{role}")
+    // POST: add a new user {role} S-student; I-instructor; A-Admin
+    // format: SIA;
+    @PostMapping("/users")
     public ResponseEntity<User> addUser(@RequestParam String firstName, @RequestParam String lastName, @RequestParam String email,
-                          @RequestParam String password, @RequestParam int phoneNumber, @PathVariable String role,
+                          @RequestParam String password, @RequestParam int phoneNumber, @RequestParam String role,
                           @RequestParam String certificationType, @RequestParam Date certificationExpiryDate) {
-        try {
 
+        try {
             int active = 1;
 
             String rememberToken = Jwts.builder()
                     .claim("email", email)
+                    .claim("role", role)
                     .setSubject(firstName)
                     .setIssuedAt(Date.from(Instant.now()))
                     .compact();
@@ -70,14 +81,22 @@ public class UserController {
 
             Certificate _certificate;
 
-            if(role == "I"){
+            String[] arRole = role.split("-", 0);
+
+            if(Arrays.asList(arRole).contains("I")){
                 _certificate = new Certificate( Date.from(Instant.now()),  certificationType,  certificationExpiryDate);
+
             }else{
                 _certificate = null;
             }
 
             User _user = new User(firstName, lastName, email, password, phoneNumber, active,
                     rememberToken, createdAt, updatedAt, _certificate);
+
+            for(String r: arRole){
+                RoleUser _roleUser = new RoleUser(_user, roleRepository.findByNameCode(r));
+                roleUserRepository.save(_roleUser);
+            }
 
             userRepository.save(_user);
 

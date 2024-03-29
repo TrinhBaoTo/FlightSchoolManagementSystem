@@ -6,6 +6,11 @@ import jakarta.persistence.*;
 @Table(name = "role_user")
 public class RoleUser {
 
+    @Id
+    @GeneratedValue
+    @Column(name = "id")
+    private Integer id;
+
     @ManyToOne
     @MapsId("userId")
     @JoinColumn(name = "user_id")

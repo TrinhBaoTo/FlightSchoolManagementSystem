@@ -14,9 +14,8 @@ public class Role {
     @Column(name = "display_name", nullable = false)
     private String displayName;
 
-    @Column(name = "name", nullable = false)
-    private int name;
-
+    @Column(name = "name_code", nullable = false, length = 1)
+    private String nameCode;
     @Column(name = "description", nullable = false)
     private String description;
 
@@ -29,9 +28,9 @@ public class Role {
     public Role() {
     }
 
-    public Role(String displayName, int name, String description, Date createdAt, Date updatedAt) {
+    public Role(String displayName, String nameCode, String description, Date createdAt, Date updatedAt) {
         this.displayName = displayName;
-        this.name = name;
+        this.nameCode = nameCode;
         this.description = description;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
