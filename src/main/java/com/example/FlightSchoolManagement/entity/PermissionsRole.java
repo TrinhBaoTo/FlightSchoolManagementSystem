@@ -17,6 +17,7 @@ public class PermissionsRole{
     @Column(name = "permissions_id")
     private int permissionsId;
 
+    @NonNull
     @Column(name = "role_id", nullable = false)
     private int roleId;
 }

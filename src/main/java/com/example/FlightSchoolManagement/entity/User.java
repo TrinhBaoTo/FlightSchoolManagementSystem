@@ -34,9 +34,11 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @NonNull
     @Column(name = "phone_number", nullable = false)
     private int phoneNumber;
 
+    @NonNull
     @Column(name = "active", nullable = false)
     private int active;
 
