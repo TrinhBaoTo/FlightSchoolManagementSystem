@@ -1,12 +1,12 @@
-@NotNull:
+@NotNull -
 
-@Getter & @Setter
+@Getter & @Setter - Auto generate getter and setter for variable
 
 @ToString
 
 @EqualsAndHashCode
 
-@NoArgsConstructor & @AllArgsConstructor
+@NoArgsConstructor & @AllArgsConstructor -
 
 @RequiredArgConstructor
 
@@ -27,4 +27,4 @@
 @Cleanup
 
 
-
+*** Data Migration: in Architecture
