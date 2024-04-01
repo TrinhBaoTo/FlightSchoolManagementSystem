@@ -1,18 +1,13 @@
 package com.example.FlightSchoolManagement.controller;
 
-import com.example.FlightSchoolManagement.entity.Certificate;
 import com.example.FlightSchoolManagement.entity.Role;
-import com.example.FlightSchoolManagement.entity.User;
 import com.example.FlightSchoolManagement.repository.RoleRepository;
-import com.example.FlightSchoolManagement.repository.UserRepository;
-import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,10 +23,10 @@ public class RoleController {
     public ResponseEntity<List<Role>> getUsers(@RequestParam Integer id){
 
         try {
-            List<Role> roles = new ArrayList<Role>();
+            List<Role> roles = new ArrayList<>();
 
             if (id == null){
-                roleRepository.findAll().forEach(roles::add);
+                roles.addAll(roleRepository.findAll());
 
             } else{
                 roleRepository.findById(id).ifPresent(roles::add);

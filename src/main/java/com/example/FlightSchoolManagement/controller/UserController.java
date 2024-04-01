@@ -1,8 +1,6 @@
 package com.example.FlightSchoolManagement.controller;
 
 import java.util.*;
-
-import com.example.FlightSchoolManagement.entity.Airport;
 import com.example.FlightSchoolManagement.entity.Certificate;
 import com.example.FlightSchoolManagement.entity.RoleUser;
 import com.example.FlightSchoolManagement.entity.User;
@@ -14,11 +12,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import io.jsonwebtoken.Jwts;
 import java.time.Instant;
 import java.util.Date;
-import java.util.UUID;
 
 @RestController
 public class UserController {
@@ -41,10 +37,10 @@ public class UserController {
             List<User> users = new ArrayList<User>();
 
             if (email == null){
-                userRepository.findAll().forEach(users::add);
+                users.addAll(userRepository.findAll());
 
             } else{
-                userRepository.findByEmail(email).forEach(users::add);
+                users.addAll(userRepository.findByEmail(email));
             }
 
             if (users.isEmpty()) {
