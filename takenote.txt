@@ -1,0 +1,30 @@
+@NotNull:
+
+@Getter & @Setter
+
+@ToString
+
+@EqualsAndHashCode
+
+@NoArgsConstructor & @AllArgsConstructor
+
+@RequiredArgConstructor
+
+@Data
+
+@Value
+
+@Builder
+
+@SneakyThrows
+
+@Synchronized
+
+@With
+
+@Log  (SLF4J (@Slf4j) và Log4j (@Log4j, @Log4j2))
+
+@Cleanup
+
+
+

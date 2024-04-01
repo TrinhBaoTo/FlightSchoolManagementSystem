@@ -1,10 +1,15 @@
 package com.example.FlightSchoolManagement.entity;
 
 import jakarta.persistence.*;
-import java.time.Instant;
+import lombok.*;
 import java.util.Date;
 
 @Entity
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@RequiredArgsConstructor
 @Table(name = "certificate")
 public class Certificate {
     @Id
@@ -12,21 +17,15 @@ public class Certificate {
     @Column(name = "id")
     private int id;
 
+    @NonNull
     @Column(name = "hire_date", nullable = false)
     private Date hireDate;
 
+    @NonNull
     @Column(name = "certification_type", nullable = false)
     private String certificationType;
 
+    @NonNull
     @Column(name = "certification_expiry_date", nullable = false)
     private Date certificationExpiryDate;
-
-    public Certificate() {
-    }
-
-    public Certificate(Date hireDate, String certificationType, Date certificationExpiryDate) {
-        this.hireDate = hireDate;
-        this.certificationType = certificationType;
-        this.certificationExpiryDate = certificationExpiryDate;
-    }
 }

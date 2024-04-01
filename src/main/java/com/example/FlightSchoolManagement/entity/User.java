@@ -1,9 +1,16 @@
 package com.example.FlightSchoolManagement.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.util.Date;
 
 @Entity
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@RequiredArgsConstructor
 @Table(name = "users")
 public class User {
     @Id
@@ -11,15 +18,19 @@ public class User {
     @Column(name = "id")
     private Long id;
 
+    @NonNull
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
+    @NonNull
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
+    @NonNull
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
+    @NonNull
     @Column(name = "password", nullable = false)
     private String password;
 
@@ -29,62 +40,20 @@ public class User {
     @Column(name = "active", nullable = false)
     private int active;
 
+    @NonNull
     @Column(name = "remember_token", nullable = false)
     private String rememberToken;
 
+    @NonNull
     @Column(name = "created_at", nullable = false)
     private Date  createdAt;
 
-    @Column(name = "updated_at", nullable = true)
+    @NonNull
+    @Column(name = "updated_at")
     private Date  updatedAt;
 
+    @NonNull
     @ManyToOne
-    @JoinColumn(name = "certificate_id", nullable = true)
+    @JoinColumn(name = "certificate_id")
     private Certificate certificate;
-
-    public User() {
-
-    }
-
-    public User(String firstName, String lastName, String email, String password, int phoneNumber, int active,
-                String rememberToken, Date  createdAt, Date updatedAt, Certificate certificate) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.password = password;
-        this.phoneNumber = phoneNumber;
-        this.active = active;
-        this.rememberToken = rememberToken;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.certificate = certificate;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setTitle(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public int isActive() {
-        return active;
-    }
 }

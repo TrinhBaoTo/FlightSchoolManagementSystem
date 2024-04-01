@@ -1,8 +1,14 @@
 package com.example.FlightSchoolManagement.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@RequiredArgsConstructor
 @Table(name = "permissions_role")
 public class PermissionsRole{
 
@@ -13,11 +19,4 @@ public class PermissionsRole{
 
     @Column(name = "role_id", nullable = false)
     private int roleId;
-
-    public PermissionsRole() {
-    }
-
-    public PermissionsRole(int roleId) {
-        this.roleId = roleId;
-    }
 }

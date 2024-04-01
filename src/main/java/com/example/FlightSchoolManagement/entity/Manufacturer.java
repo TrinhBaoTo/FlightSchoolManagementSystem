@@ -1,8 +1,14 @@
 package com.example.FlightSchoolManagement.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@RequiredArgsConstructor
 @Table(name = "manufacturer")
 public class Manufacturer {
     @Id
@@ -10,13 +16,7 @@ public class Manufacturer {
     @Column(name = "id")
     private int id;
 
+    @NonNull
     @Column(name = "name", nullable = false)
     private String name;
-
-    public Manufacturer() {
-    }
-
-    public Manufacturer(String name) {
-        this.name = name;
-    }
 }

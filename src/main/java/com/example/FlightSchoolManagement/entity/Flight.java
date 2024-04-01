@@ -1,9 +1,16 @@
 package com.example.FlightSchoolManagement.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.util.Date;
 
 @Entity
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@RequiredArgsConstructor
 @Table(name = "flight")
 public class Flight {
     @Id
@@ -14,45 +21,36 @@ public class Flight {
     @Column(name = "flight_number", nullable = false)
     private int flightNumber;
 
+    @NonNull
     @ManyToOne
     @JoinColumn(name = "departure_airport", nullable = false)
     private Airport departureAirport;
 
+    @NonNull
     @ManyToOne
     @JoinColumn(name = "arrival_airport", nullable = false)
     private Airport arrivalAirport;
 
+    @NonNull
     @Column(name = "departure_date_time", nullable = false)
     private Date departureDateTime;
 
+    @NonNull
     @Column(name = "arrival_date_time", nullable = false)
     private Date arrivalDateTime;
 
+    @NonNull
     @ManyToOne
     @JoinColumn(name = "aircraft_id", nullable = false)
     private Aircraft aircraft;
 
+    @NonNull
     @ManyToOne
     @JoinColumn(name = "instructor_id", nullable = false)
     private User instructor;
 
+    @NonNull
     @ManyToOne
     @JoinColumn(name = "student_id", nullable = false)
     private User student;
-
-    public Flight() {
-    }
-
-    public Flight(int flightNumber, Airport departureAirport, Airport arrivalAirport, Date departureDateTime,
-                  Date arrivalDateTime, Aircraft aircraft, User instructor, User student) {
-        this.flightNumber = flightNumber;
-        this.departureAirport = departureAirport;
-        this.arrivalAirport = arrivalAirport;
-        this.departureDateTime = departureDateTime;
-        this.arrivalDateTime = arrivalDateTime;
-        this.aircraft = aircraft;
-        this.instructor = instructor;
-        this.student = student;
-    }
-
 }

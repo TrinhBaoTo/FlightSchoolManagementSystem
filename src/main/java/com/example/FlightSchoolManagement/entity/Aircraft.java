@@ -1,10 +1,16 @@
 package com.example.FlightSchoolManagement.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.Date;
 
 @Entity
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@RequiredArgsConstructor
 @Table(name = "aircraft")
 public class Aircraft {
     @Id
@@ -15,9 +21,11 @@ public class Aircraft {
     @Column(name = "registration_number", nullable = false)
     private int registrationNumber;
 
+    @NonNull
     @Column(name = "model", nullable = false)
     private String model;
 
+    @NonNull
     @ManyToOne
     @JoinColumn(name = "manufacturer_id", nullable = false)
     private Manufacturer manufacturer;
@@ -25,6 +33,7 @@ public class Aircraft {
     @Column(name = "year_manufactured", nullable = false)
     private int yearManufactured;
 
+    @NonNull
     @Column(name = "purchase_date", nullable = false)
     private Date purchaseDate;
 
@@ -33,18 +42,4 @@ public class Aircraft {
 
     @Column(name = "availability", nullable = false)
     private int availability;
-
-    public Aircraft() {
-    }
-
-    public Aircraft(int registrationNumber, String model, Manufacturer manufacturer, int yearManufactured,
-                    Date purchaseDate, double purchasePrice, int availability) {
-        this.registrationNumber = registrationNumber;
-        this.model = model;
-        this.manufacturer = manufacturer;
-        this.yearManufactured = yearManufactured;
-        this.purchaseDate = purchaseDate;
-        this.purchasePrice = purchasePrice;
-        this.availability = availability;
-    }
 }

@@ -8,7 +8,6 @@ import java.util.Optional;
 import com.example.FlightSchoolManagement.entity.Airport;
 import com.example.FlightSchoolManagement.repository.AirportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,12 +24,12 @@ public class AirportController {
     @GetMapping("/airports")
     public ResponseEntity<List<Airport>> getAllAirport(@RequestParam(required = false) String codeIata) {
         try {
-            List<Airport> airports = new ArrayList<Airport>();
+            List<Airport> airports = new ArrayList<>();
 
             if (codeIata == null){
-                airportRepository.findAll().forEach(airports::add);
+                airports.addAll(airportRepository.findAll());
             } else{
-                airportRepository.findByCode(codeIata).forEach(airports::add);
+                airports.addAll(airportRepository.findByCodeIata(codeIata));
             }
 
             if (airports.isEmpty()) {
@@ -49,13 +48,13 @@ public class AirportController {
 
         Optional<Airport> airportData = airportRepository.findById(id);
 
+        ResponseEntity<Airport> airportResponseEntity;
         if (airportData.isPresent()) {
-            ResponseEntity<Airport> airportResponseEntity = new ResponseEntity<>(airportData.get(), HttpStatus.OK);
-            return airportResponseEntity;
+            airportResponseEntity = new ResponseEntity<>(airportData.get(), HttpStatus.OK);
         } else {
-            ResponseEntity<Airport> airportResponseEntity = new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            return airportResponseEntity;
+            airportResponseEntity = new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        return airportResponseEntity;
     }
 
     // POST: add a new airport
@@ -64,12 +63,10 @@ public class AirportController {
         try {
 
             Airport _airport = airportRepository.save(new Airport(codeIata));
-            ResponseEntity<Airport> airportResponseEntity = new ResponseEntity<>(_airport, HttpStatus.CREATED);
-            return airportResponseEntity;
+            return new ResponseEntity<>(_airport, HttpStatus.CREATED);
 
         } catch (Exception e) {
-            ResponseEntity<Airport> airportResponseEntity = new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-            return airportResponseEntity;
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

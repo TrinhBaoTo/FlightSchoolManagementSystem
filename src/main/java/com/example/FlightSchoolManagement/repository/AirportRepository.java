@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AirportRepository extends JpaRepository<Airport, Integer> {
-    List<Airport> findByCode(String codeIata);
+    List<Airport> findByCodeIata(String codeIata);
 }
