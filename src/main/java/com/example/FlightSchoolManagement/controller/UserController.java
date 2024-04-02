@@ -1,22 +1,30 @@
 package com.example.FlightSchoolManagement.controller;
 
-import java.util.*;
 import com.example.FlightSchoolManagement.entity.Certificate;
 import com.example.FlightSchoolManagement.entity.RoleUser;
 import com.example.FlightSchoolManagement.entity.User;
+
+import com.example.FlightSchoolManagement.repository.CertificateRepository;
 import com.example.FlightSchoolManagement.repository.RoleRepository;
 import com.example.FlightSchoolManagement.repository.RoleUserRepository;
 import com.example.FlightSchoolManagement.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import io.jsonwebtoken.Jwts;
+
+import java.util.*;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Base64;
+
+import io.jsonwebtoken.Jwts;
+
+import lombok.EqualsAndHashCode;
 
 @RestController
+@EqualsAndHashCode
 public class UserController {
 
     @Autowired
@@ -28,6 +36,8 @@ public class UserController {
     @Autowired
     RoleRepository roleRepository;
 
+    @Autowired
+    CertificateRepository certificateRepository;
 
     // GET to retrieve all or user by email
     @GetMapping("/users")
@@ -63,31 +73,30 @@ public class UserController {
                           @RequestParam String certificationType, @RequestParam Date certificationExpiryDate) {
 
         try {
+
             int active = 1;
 
-            String rememberToken = Jwts.builder()
-                    .claim("email", email)
-                    .claim("role", role)
-                    .setSubject(firstName)
-                    .setIssuedAt(Date.from(Instant.now()))
-                    .compact();
+            String info = email + role + firstName;
+            String rememberToken = Base64.getEncoder().encodeToString(info.getBytes());
 
             Date  createdAt = Date.from(Instant.now());
             Date  updatedAt = Date.from(Instant.now());
 
             Certificate _certificate;
+            int certId;
 
             String[] arRole = role.split("-", 0);
 
             if(Arrays.asList(arRole).contains("I")){
                 _certificate = new Certificate( Date.from(Instant.now()),  certificationType,  certificationExpiryDate);
-
+                certId = _certificate.getId();
+                certificateRepository.save(_certificate);
             }else{
-                _certificate = null;
+                certId = -1;
             }
 
             User _user = new User(firstName, lastName, email, password, phoneNumber, active,
-                    rememberToken, createdAt, updatedAt, _certificate);
+                    rememberToken, createdAt, updatedAt, certId);
 
             for(String r: arRole){
                 RoleUser _roleUser = new RoleUser(_user, roleRepository.findByNameCode(r));
@@ -98,13 +107,12 @@ public class UserController {
 
             return new ResponseEntity<>(_user, HttpStatus.OK);
 
-
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    // PUT: update an existing user
+    // PUT: update an existing user information
     @PutMapping("/users/{id}")
     public String updateUser(@PathVariable Integer id, @RequestParam String name) {
 
@@ -112,35 +120,4 @@ public class UserController {
 
     }
 
-    // DELETE: delete a user by ID
-    @DeleteMapping("/users/{id}")
-    public String deleteUser(@PathVariable Integer id) {
-
-            return "User deleted successfully";
-
-    }
-
-    // TRACE: testing purposes (echo server)
-    // Failed Test
-    @RequestMapping(value = "/trace", method = RequestMethod.TRACE)
-    public String echoServer(@RequestBody String body) {
-        return body;
-    }
-
-    // OPTIONS: get supported HTTP methods
-    @RequestMapping(value = "/options", method = RequestMethod.OPTIONS)
-    public String getSupportedMethods() {
-        return "GET, POST, PUT, DELETE, TRACE, OPTIONS, CONNECT, HEAD";
-    }
-
-    // HEAD: retrieve only the headers of a resource
-    @RequestMapping(value = "/head", method = RequestMethod.HEAD)
-    public ResponseEntity<Void> getUserHeaders() {
-        // Add new header to return
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("NEW-header", "xxxxxxx");
-        return new ResponseEntity<>(headers, HttpStatus.OK);
-    }
-
-    // Does not support CONNECT but have PATCH - apply partial modifications to a resource.
 }

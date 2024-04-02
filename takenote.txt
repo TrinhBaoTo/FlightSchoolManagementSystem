@@ -1,30 +1,35 @@
-@NotNull -
+@NotNull - validate a constructor or a method parameter, a field with @NonNull.
 
-@Getter & @Setter - Auto generate getter and setter for variable
+@Getter & @Setter - generate getter and setter methods for all class fields. No longer need to write these methods manually.
 
-@ToString
+@ToString - generates a toString() method that includes all fields’ values.
 
-@EqualsAndHashCode
+@EqualsAndHashCode - generates equals() and hashCode() methods based on the class fields.
 
-@NoArgsConstructor & @AllArgsConstructor -
+@NoArgsConstructor & @AllArgsConstructor - generates a constructor with no arguments and a constructor that receives all the fields.
 
-@RequiredArgConstructor
+@RequiredArgConstructor - define constructors for the fields that are final — after all, the non-final fields can be set later
 
-@Data
+@Data - equivalent of @Getters, @Setters, @ToString, @EqualsAndHashCode, and @ToString
 
-@Value
+@Value -  work with immutable classes, all the fields will be declared private and final, and will be required by the constructor.
+    Immutable classes:  internal state cannot be changed after it has been initialized.
+        Once an object of an immutable class is created, its content remains fixed throughout its lifetime.
 
-@Builder
+@Builder - inject an implementation of the builder design pattern.
 
-@SneakyThrows
+@SneakyThrows -  the code will be surrounded by a try-catch block and the checked exception will be wrapped in a RuntimeException.
 
-@Synchronized
+@Synchronized - synchronize method calls.
 
-@With
+@With - for immutable classes, equivalent of a setter will be generated.
+    Return a completely new instance of the object, with one of the fields updated.
 
-@Log  (SLF4J (@Slf4j) và Log4j (@Log4j, @Log4j2))
+@Log (SLF4J (@Slf4j) và Log4j (@Log4j, @Log4j2)) - automatically creates a logger field in your class.
 
-@Cleanup
+@Cleanup - ensure a given resource is automatically cleaned up before leaving the current scope.
 
 
-*** Data Migration: in Architecture
+DECODE:
+byte[] decodedBytes = Base64.getDecoder().decode(rememberToken);
+        String decodedString = new String(decodedBytes);

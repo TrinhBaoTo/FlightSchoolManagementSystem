@@ -13,6 +13,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 @Table(name = "users")
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -54,8 +55,6 @@ public class User {
     @Column(name = "updated_at")
     private Date  updatedAt;
 
-    @NonNull
-    @ManyToOne
     @JoinColumn(name = "certificate_id")
-    private Certificate certificate;
+    private int certificateID;
 }
