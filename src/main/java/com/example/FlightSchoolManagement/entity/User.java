@@ -55,6 +55,7 @@ public class User {
     @Column(name = "updated_at")
     private Date  updatedAt;
 
+    @NonNull
     @JoinColumn(name = "certificate_id")
     private int certificateID;
 }
