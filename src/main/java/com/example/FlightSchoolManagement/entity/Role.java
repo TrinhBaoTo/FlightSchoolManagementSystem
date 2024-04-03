@@ -13,6 +13,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 @Table(name = "roles")
 public class Role {
+
     @Id
     @GeneratedValue
     @Column(name = "id")

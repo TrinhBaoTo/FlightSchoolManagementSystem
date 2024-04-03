@@ -10,6 +10,7 @@ import com.example.FlightSchoolManagement.repository.RoleUserRepository;
 import com.example.FlightSchoolManagement.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,9 +21,11 @@ import java.util.Date;
 import java.util.Base64;
 
 import lombok.EqualsAndHashCode;
+import lombok.extern.log4j.Log4j;
 
 @RestController
 @EqualsAndHashCode
+@Log4j
 public class UserController {
 
     @Autowired
@@ -68,8 +71,8 @@ public class UserController {
     //        format: SIA;
     @PostMapping("/users")
     public ResponseEntity<String> addUser(@RequestParam String firstName, @RequestParam String lastName, @RequestParam String email,
-                          @RequestParam String password, @RequestParam String phoneNumber, @RequestParam String role,
-                          @RequestParam String certificationType, @RequestParam Date certificationExpiryDate) {
+                                          @RequestParam String password, @RequestParam String phoneNumber, @RequestParam String role,
+                                          @RequestParam String certificationType, @RequestParam("date") @DateTimeFormat(pattern = "dd.MM.yyyy") Date certificationExpiryDate) {
 
         try {
 
@@ -108,7 +111,6 @@ public class UserController {
             // Create user and save to inventory
             User _user = new User(firstName, lastName, email, password, phoneNumber, active,
                     rememberToken, createdAt, updatedAt, certId);
-            userRepository.save(_user);
 
             // Set up User and Role connection
             for(String r: arRole){
@@ -116,10 +118,14 @@ public class UserController {
                 roleUserRepository.save(_roleUser);
             }
 
+            userRepository.save(_user);
+
             return ResponseEntity.status(HttpStatus.OK)
                     .body("Sign Up Success - " + rememberToken);
 
         } catch (Exception e) {
+
+            log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sign Up Failed");
         }
     }
