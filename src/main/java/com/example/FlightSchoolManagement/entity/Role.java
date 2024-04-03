@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Setter
@@ -18,6 +20,9 @@ public class Role {
     @GeneratedValue
     @Column(name = "id")
     private int id;
+
+    @OneToMany(mappedBy = "role")
+    private Set<RoleUser> roleUser = new HashSet<>();
 
     @NonNull
     @Column(name = "display_name", nullable = false)

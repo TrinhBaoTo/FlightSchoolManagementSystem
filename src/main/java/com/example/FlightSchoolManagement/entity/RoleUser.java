@@ -8,14 +8,12 @@ import lombok.*;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@RequiredArgsConstructor
 @Table(name = "role_user")
 public class RoleUser {
 
-    @Id
-    @GeneratedValue
-    @Column(name = "id")
-    private Integer id;
+    @EmbeddedId
+    @Column(name="id")
+    private RoleUserId roleUserId;
 
     @NonNull
     @ManyToOne
@@ -28,4 +26,10 @@ public class RoleUser {
     @MapsId("roleId")
     @JoinColumn(name = "role_id", referencedColumnName="id")
     private Role role;
+
+    public RoleUser(User _user, Role _role) {
+        this.roleUserId = new RoleUserId(_user.getId(), _role.getId());
+        this.user = _user;
+        this.role = _role;
+    }
 }

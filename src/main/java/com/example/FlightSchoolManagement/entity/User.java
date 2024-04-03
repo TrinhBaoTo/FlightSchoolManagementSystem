@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Setter
@@ -18,6 +20,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
+
+    @OneToMany(mappedBy = "user")
+    private Set<RoleUser> roleUser = new HashSet<>();
 
     @NonNull
     @Column(name = "first_name", nullable = false)

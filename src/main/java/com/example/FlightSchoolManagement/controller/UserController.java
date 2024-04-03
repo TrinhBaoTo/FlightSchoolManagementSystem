@@ -1,6 +1,7 @@
 package com.example.FlightSchoolManagement.controller;
 
 import com.example.FlightSchoolManagement.entity.Certificate;
+import com.example.FlightSchoolManagement.entity.Role;
 import com.example.FlightSchoolManagement.entity.RoleUser;
 import com.example.FlightSchoolManagement.entity.User;
 
@@ -79,7 +80,7 @@ public class UserController {
             // Set user as active
             int active = 1;
 
-            // Encode token
+            // Encode token add exp date - 1 year
             String info = email + " " + role +  " "  + firstName;
             String rememberToken = Base64.getEncoder().encodeToString(info.getBytes());
 
@@ -111,14 +112,13 @@ public class UserController {
             // Create user and save to inventory
             User _user = new User(firstName, lastName, email, password, phoneNumber, active,
                     rememberToken, createdAt, updatedAt, certId);
+            userRepository.save(_user);
 
             // Set up User and Role connection
             for(String r: arRole){
                 RoleUser _roleUser = new RoleUser(_user, roleRepository.findByNameCode(r));
                 roleUserRepository.save(_roleUser);
             }
-
-            userRepository.save(_user);
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body("Sign Up Success - " + rememberToken);
@@ -156,6 +156,8 @@ public class UserController {
                 verified = false;
             }
         }
+
+        // ADD SESSION expiration time
 
         // If user is verified,
         if(verified){
