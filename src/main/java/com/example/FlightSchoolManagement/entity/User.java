@@ -37,7 +37,7 @@ public class User {
 
     @NonNull
     @Column(name = "phone_number", nullable = false)
-    private int phoneNumber;
+    private String phoneNumber;
 
     @NonNull
     @Column(name = "active", nullable = false)

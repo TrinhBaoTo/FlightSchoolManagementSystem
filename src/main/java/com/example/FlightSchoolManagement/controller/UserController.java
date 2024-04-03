@@ -68,7 +68,7 @@ public class UserController {
     //        format: SIA;
     @PostMapping("/users")
     public ResponseEntity<String> addUser(@RequestParam String firstName, @RequestParam String lastName, @RequestParam String email,
-                          @RequestParam String password, @RequestParam int phoneNumber, @RequestParam String role,
+                          @RequestParam String password, @RequestParam String phoneNumber, @RequestParam String role,
                           @RequestParam String certificationType, @RequestParam Date certificationExpiryDate) {
 
         try {
@@ -167,7 +167,7 @@ public class UserController {
     // POST: change information
     @PostMapping("/users/update")
     public ResponseEntity<HttpStatus> updateUserInfo(@RequestParam String token, @RequestParam String firstName,
-                                                     @RequestParam String lastName, @RequestParam Integer phoneNumber) {
+                                                     @RequestParam String lastName, @RequestParam String phoneNumber) {
         try{
 
             // Assume logged in when reach here
