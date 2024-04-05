@@ -1,5 +1,6 @@
 package com.example.FlightSchoolManagement.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,8 +20,10 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
+    @JsonIgnore
     private int id;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private Set<RoleUser> roleUser = new HashSet<>();
 
@@ -37,6 +40,7 @@ public class User {
     private String email;
 
     @NonNull
+    @JsonIgnore
     @Column(name = "password", nullable = false)
     private String password;
 
@@ -45,6 +49,7 @@ public class User {
     private String phoneNumber;
 
     @NonNull
+    @JsonIgnore
     @Column(name = "active", nullable = false)
     private int active;
 
@@ -61,6 +66,7 @@ public class User {
     private Date  updatedAt;
 
     @NonNull
+    @JsonIgnore
     @JoinColumn(name = "certificate_id")
     private int certificateID;
 }

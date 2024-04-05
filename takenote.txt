@@ -10,7 +10,7 @@
 
 @RequiredArgConstructor - define constructors for the fields that are final — after all, the non-final fields can be set later
 
-@Data - equivalent of @Getters, @Setters, @ToString, @EqualsAndHashCode, and @ToString
+@Data - equivalent of @Getters, @Setters, @EqualsAndHashCode, and @ToString
 
 @Value -  work with immutable classes, all the fields will be declared private and final, and will be required by the constructor.
     Immutable classes:  internal state cannot be changed after it has been initialized.

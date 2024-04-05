@@ -1,7 +1,6 @@
 package com.example.FlightSchoolManagement.controller;
 
 import com.example.FlightSchoolManagement.entity.Certificate;
-import com.example.FlightSchoolManagement.entity.Role;
 import com.example.FlightSchoolManagement.entity.RoleUser;
 import com.example.FlightSchoolManagement.entity.User;
 
@@ -10,6 +9,7 @@ import com.example.FlightSchoolManagement.repository.RoleRepository;
 import com.example.FlightSchoolManagement.repository.RoleUserRepository;
 import com.example.FlightSchoolManagement.repository.UserRepository;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -43,25 +43,31 @@ public class UserController {
 
     // GET to retrieve all or user by email
     @GetMapping("/users")
+    @JsonIgnore
     public ResponseEntity<List<User>> getUsers(@RequestParam String email){
 
         try {
             List<User> users = new ArrayList<User>();
 
-            if (email == null){
-                users.addAll(userRepository.findAll());
+            if (email.isEmpty()){
+                users = userRepository.findAll();
 
             } else{
                 users.add(userRepository.findByEmail(email));
             }
 
             if (users.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
+                ResponseEntity<List<User>> r = new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                return r;
             }
 
-            return new ResponseEntity<>(users, HttpStatus.OK);
+            ResponseEntity<List<User>> r = new ResponseEntity<>(users, HttpStatus.OK);
+            return r;
 
         } catch (Exception e) {
+
+            log.error(e.getMessage());
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -100,8 +106,8 @@ public class UserController {
 
                 // Create Certificate
                 _certificate = new Certificate( Date.from(Instant.now()),  certificationType,  certificationExpiryDate);
-                certId = _certificate.getId();
                 certificateRepository.save(_certificate);
+                certId = _certificate.getId();
 
             }else{
 
@@ -132,7 +138,8 @@ public class UserController {
 
     // GET: user login
     @GetMapping("/users/login")
-    public ResponseEntity<String> loginUser(@RequestParam String token, @RequestParam String email, @RequestParam String password) {
+    public ResponseEntity<String> loginUser(@RequestParam String token, @RequestParam String email,
+                                            @RequestParam String password) {
 
         // Get user by email
         User _user = userRepository.findByEmail(email);
@@ -149,10 +156,11 @@ public class UserController {
 
             String[] info = decodedToken.split(" ", 0);
 
-            String comp = info[0] +  info[1];
+            String input = info[0] + " " + info[2];
+            String db = email + " " + _user.getFirstName();
 
             // Check if decoded token information is the same w _user
-            if(!comp.equals(email+" "+ _user.getFirstName())){
+            if(!input.equals(db)){
                 verified = false;
             }
         }
@@ -177,7 +185,6 @@ public class UserController {
     public ResponseEntity<HttpStatus> updateUserInfo(@RequestParam String token, @RequestParam String firstName,
                                                      @RequestParam String lastName, @RequestParam String phoneNumber) {
         try{
-
             // Assume logged in when reach here
             // Decode token
             byte[] decodedBytes = Base64.getDecoder().decode(token);

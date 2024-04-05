@@ -13,5 +13,4 @@ public class FlightSchoolManagementApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(FlightSchoolManagementApplication.class, args);
 	}
-
 }
