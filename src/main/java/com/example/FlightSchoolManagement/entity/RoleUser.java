@@ -1,5 +1,7 @@
 package com.example.FlightSchoolManagement.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,12 +21,14 @@ public class RoleUser {
     @ManyToOne
     @MapsId("userId")
     @JoinColumn(name="user_id", referencedColumnName="id")
+    @JsonBackReference
     private User user;
 
     @NonNull
     @ManyToOne
     @MapsId("roleId")
     @JoinColumn(name = "role_id", referencedColumnName="id")
+    @JsonBackReference
     private Role role;
 
     public RoleUser(User _user, Role _role) {

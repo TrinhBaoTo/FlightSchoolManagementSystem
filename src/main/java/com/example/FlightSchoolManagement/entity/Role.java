@@ -1,5 +1,9 @@
 package com.example.FlightSchoolManagement.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,6 +26,7 @@ public class Role {
     private int id;
 
     @OneToMany(mappedBy = "role")
+    @JsonManagedReference
     private Set<RoleUser> roleUser = new HashSet<>();
 
     @NonNull

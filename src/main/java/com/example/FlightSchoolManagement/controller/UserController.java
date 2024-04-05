@@ -72,7 +72,6 @@ public class UserController {
         }
     }
 
-
     // POST: user sign up
     // {role} S-student; I-instructor; A-Admin
     //        format: SIA;

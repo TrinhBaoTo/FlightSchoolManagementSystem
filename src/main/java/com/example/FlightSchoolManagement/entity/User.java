@@ -1,12 +1,13 @@
 package com.example.FlightSchoolManagement.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
 
 @Entity
 @Setter
@@ -20,11 +21,10 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    @JsonIgnore
     private int id;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "user")
+    @JsonManagedReference
     private Set<RoleUser> roleUser = new HashSet<>();
 
     @NonNull
@@ -40,7 +40,6 @@ public class User {
     private String email;
 
     @NonNull
-    @JsonIgnore
     @Column(name = "password", nullable = false)
     private String password;
 
@@ -49,7 +48,6 @@ public class User {
     private String phoneNumber;
 
     @NonNull
-    @JsonIgnore
     @Column(name = "active", nullable = false)
     private int active;
 
@@ -66,7 +64,6 @@ public class User {
     private Date  updatedAt;
 
     @NonNull
-    @JsonIgnore
     @JoinColumn(name = "certificate_id")
     private int certificateID;
 }
