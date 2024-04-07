@@ -58,12 +58,10 @@ public class UserController {
 
             if (users.isEmpty()) {
 
-                ResponseEntity<List<User>> r = new ResponseEntity<>(HttpStatus.NO_CONTENT);
-                return r;
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
 
-            ResponseEntity<List<User>> r = new ResponseEntity<>(users, HttpStatus.OK);
-            return r;
+            return new ResponseEntity<>(users, HttpStatus.OK);
 
         } catch (Exception e) {
 
@@ -79,14 +77,14 @@ public class UserController {
     public ResponseEntity<String> addUser(@RequestParam String firstName, @RequestParam String lastName, @RequestParam String email,
                                           @RequestParam String password, @RequestParam String phoneNumber, @RequestParam String role,
                                           @RequestParam String certificationType, @RequestParam("date") @DateTimeFormat(pattern = "dd.MM.yyyy") Date certificationExpiryDate) {
-
         try {
 
             // Set user as active
             int active = 1;
 
-            // Encode token add exp date - 1 year
-            String info = email + " " + role +  " "  + firstName;
+            // Encode token
+            // TODO:  add exp date - 1 year
+            String info = email + " " + role +  " "  + password;
             String rememberToken = Base64.getEncoder().encodeToString(info.getBytes());
 
             // Get Date fo Constructor
@@ -137,34 +135,18 @@ public class UserController {
 
     // GET: user login
     @GetMapping("/users/login")
-    public ResponseEntity<String> loginUser(@RequestParam String token, @RequestParam String email,
+    public ResponseEntity<String> loginUser(@RequestHeader("Authorization") String bearerToken, @RequestParam String email,
                                             @RequestParam String password) {
 
         // Get user by email
         User _user = userRepository.findByEmail(email);
 
+        String token = extractToken(bearerToken);
+
         // check if password and token para the same with _user
-        boolean verified = _user != null && _user.getPassword().equals(password) && _user.getRememberToken().equals(token);
+        boolean verified = _user.getPassword().equals(password) && checkUser(_user, token);
 
-        // if the same
-        if(verified){
-
-            // decode token
-            byte[] decodedBytes = Base64.getDecoder().decode(token);
-            String decodedToken = new String(decodedBytes);
-
-            String[] info = decodedToken.split(" ", 0);
-
-            String input = info[0] + " " + info[2];
-            String db = email + " " + _user.getFirstName();
-
-            // Check if decoded token information is the same w _user
-            if(!input.equals(db)){
-                verified = false;
-            }
-        }
-
-        // ADD SESSION expiration time
+        // TODO: Add session expiration time
 
         // If user is verified,
         if(verified){
@@ -181,9 +163,12 @@ public class UserController {
 
     // POST: change information
     @PostMapping("/users/update")
-    public ResponseEntity<HttpStatus> updateUserInfo(@RequestParam String token, @RequestParam String firstName,
+    public ResponseEntity<String> updateUserInfo(@RequestHeader("Authorization") String bearerToken, @RequestParam String firstName,
                                                      @RequestParam String lastName, @RequestParam String phoneNumber) {
         try{
+
+            String token = extractToken(bearerToken);
+
             // Assume logged in when reach here
             // Decode token
             byte[] decodedBytes = Base64.getDecoder().decode(token);
@@ -194,15 +179,77 @@ public class UserController {
             // Get user by email taken from token
             User _user = userRepository.findByEmail(info[0]);
 
-            // Update information
-            if(firstName != null){ _user.setFirstName(firstName);}
-            if(lastName != null){ _user.setLastName(lastName);}
-            if(phoneNumber != null){ _user.setPhoneNumber(phoneNumber);}
+            String update = "Update: ";
 
-            return new ResponseEntity<>(HttpStatus.OK);
+            // Authenticate the user
+            if(_user != null && checkUser(_user, token)){
+
+                // Update information
+                if(!firstName.isEmpty()){
+                    _user.setFirstName(firstName);
+                    userRepository.save(_user);
+                    update = update + "firstName ";
+                }
+                if(!lastName.isEmpty()){
+                    _user.setLastName(lastName);
+                    userRepository.save(_user);
+                    update = update + "lastname ";
+                }
+                if(!phoneNumber.isEmpty()){
+                    _user.setPhoneNumber(phoneNumber);
+                    userRepository.save(_user);
+                    update = update + "phoneNumber ";
+                }
+
+                return new ResponseEntity<>(update, HttpStatus.OK);
+
+            }else{
+
+                return new ResponseEntity<>("User Not Found/ Not Verified", HttpStatus.BAD_REQUEST);
+            }
 
         } catch (Exception e) {
+
+            log.error(e.getMessage());
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    public boolean checkUser(User _user, String token) {
+
+        // check if password and token para the same with _user
+        boolean verified = _user != null && _user.getRememberToken().equals(token);
+
+        // if the same
+        if(verified){
+
+            // decode token
+            byte[] decodedBytes = Base64.getDecoder().decode(token);
+            String decodedToken = new String(decodedBytes);
+
+            String[] info = decodedToken.split(" ", 0);
+
+            String input = info[0] + " " + info[2];
+            String db = _user.getEmail() + " " + _user.getPassword();
+
+            // Check if decoded token information is the same w _user
+            if(!input.equals(db)){
+                verified = false;
+            }
+        }
+
+        return verified;
+    }
+
+    private String extractToken(String bearerToken) {
+
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+
+            // Remove "Bearer " prefix
+            return bearerToken.substring(7);
+        }
+
+        return null;
+    }
+
 }
