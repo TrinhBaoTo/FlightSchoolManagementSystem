@@ -21,7 +21,7 @@ public class AirportController {
     AirportRepository airportRepository;
 
     // GET to retrieve all airport or retrieve airport with code
-    @GetMapping("/airports")
+    @GetMapping("/airport")
     public ResponseEntity<List<Airport>> getAllAirport(@RequestParam(required = false) String codeIata) {
         try {
             List<Airport> airports = new ArrayList<>();
@@ -43,22 +43,8 @@ public class AirportController {
         }
     }
 
-    @GetMapping("/airports/{id}")
-    public ResponseEntity<Airport> getAirportById(@PathVariable("id") int id) {
-
-        Optional<Airport> airportData = airportRepository.findById(id);
-
-        ResponseEntity<Airport> airportResponseEntity;
-        if (airportData.isPresent()) {
-            airportResponseEntity = new ResponseEntity<>(airportData.get(), HttpStatus.OK);
-        } else {
-            airportResponseEntity = new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        return airportResponseEntity;
-    }
-
     // POST: add a new airport
-    @PostMapping("/airports")
+    @PostMapping("/airport")
     public ResponseEntity<Airport> createAirport(@RequestParam String codeIata) {
         try {
 
@@ -69,24 +55,4 @@ public class AirportController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-    // PUT: update an existing airport
-    @PutMapping("/airports/{id}")
-    public String updateUser(@PathVariable("id") Integer id, @RequestParam String name) {
-        return("");
-    }
-
-    // DELETE: delete an airport by ID
-    @DeleteMapping("/airports/{id}")
-     public ResponseEntity<HttpStatus> deleteAirport(@PathVariable("id") Integer id) {
-        try {
-            airportRepository.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-
-    // Does not support CONNECT but have PATCH - apply partial modifications to a resource.
 }

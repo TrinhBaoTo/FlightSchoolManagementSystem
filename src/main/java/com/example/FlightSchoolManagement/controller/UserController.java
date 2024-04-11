@@ -1,6 +1,7 @@
 package com.example.FlightSchoolManagement.controller;
 
 import com.example.FlightSchoolManagement.entity.Certificate;
+import com.example.FlightSchoolManagement.entity.Role;
 import com.example.FlightSchoolManagement.entity.RoleUser;
 import com.example.FlightSchoolManagement.entity.User;
 
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.time.Instant;
 import java.util.Date;
@@ -82,10 +84,7 @@ public class UserController {
             // Set user as active
             int active = 1;
 
-            // Encode token
-            // TODO:  add exp date - 1 year
-            String info = email + " " + role +  " "  + password;
-            String rememberToken = Base64.getEncoder().encodeToString(info.getBytes());
+            String rememberToken = "";
 
             // Get Date fo Constructor
             Date  createdAt = Date.from(Instant.now());
@@ -112,6 +111,9 @@ public class UserController {
                 certId = -1;
             }
 
+            // Notes - Good Practice
+            //  Password should be encode
+
             // Create user and save to inventory
             User _user = new User(firstName, lastName, email, password, phoneNumber, active,
                     rememberToken, createdAt, updatedAt, certId);
@@ -133,9 +135,9 @@ public class UserController {
         }
     }
 
-    // GET: user login
-    @GetMapping("/users/login")
-    public ResponseEntity<String> loginUser(@RequestHeader("Authorization") String bearerToken, @RequestParam String email,
+    // GET: user sign in
+    @GetMapping("/users/signin")
+    public ResponseEntity<String> signInUser(@RequestHeader("Authorization") String bearerToken, @RequestParam String email,
                                             @RequestParam String password) {
 
         // Get user by email
@@ -144,20 +146,54 @@ public class UserController {
         String token = extractToken(bearerToken);
 
         // check if password and token para the same with _user
-        boolean verified = _user.getPassword().equals(password) && checkUser(_user, token);
-
-        // TODO: Add session expiration time
+        boolean verified = _user.getPassword().equals(password);
 
         // If user is verified,
         if(verified){
 
+            String rememberToken = generateToken(_user);
+
+            // Notes - Good Practice
+            //   SHOULD NOT have password in token
+
             // Redirect user
             return ResponseEntity.status(HttpStatus.TEMPORARY_REDIRECT)
                     .header("Location", "https://th.bing.com/th/id/R.4d0233614a2e3260c53e9fde40af2ffb?rik=3EhR%2bPxrPIHYMg&pid=ImgRaw&r=0")
-                    .body("Log In Success - redirect to homepage");
+                        .body("Sign In Success - redirect to homepage");
         }else{
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Log In Failed");
+                    .body("Sign In Failed");
+        }
+    }
+
+    // GET: user sign out
+    @GetMapping("/users/signout")
+    public ResponseEntity<String> signOutUser(@RequestHeader("Authorization") String bearerToken, @RequestParam String email) {
+
+        try {
+
+            User _user = userRepository.findByEmail(email);
+
+            if(checkUser(_user, bearerToken)){
+
+                String token = "";
+
+                _user.setRememberToken(token);
+                userRepository.save(_user);
+
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body("Sign Out");
+            }else{
+
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Sign Out Failed");
+            }
+
+        } catch (Exception e) {
+
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Sign Out Failed");
         }
     }
 
@@ -215,6 +251,31 @@ public class UserController {
         }
     }
 
+    @PostMapping("/users/resetpassword")
+    public ResponseEntity<String> resetPassword( @RequestParam String email) {
+
+        try{
+
+            // Get user by email taken from token
+            User _user = userRepository.findByEmail(email);
+
+            // Authenticate the user
+            if(_user != null){
+
+                return new ResponseEntity<>("", HttpStatus.OK);
+
+            }else{
+
+                return new ResponseEntity<>("User Not Found/ Not Verified", HttpStatus.BAD_REQUEST);
+            }
+
+        } catch (Exception e) {
+
+            log.error(e.getMessage());
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public boolean checkUser(User _user, String token) {
 
         // check if password and token para the same with _user
@@ -236,11 +297,27 @@ public class UserController {
             if(!input.equals(db)){
                 verified = false;
             }
+
+            // Check Token Expiration Date
+            LocalDate expDate = LocalDate.parse(info[3]);
+
+            if(expDate.isBefore(LocalDate.now())){
+
+                _user.setRememberToken(generateToken(_user));
+                userRepository.save(_user);
+            }
         }
 
         return verified;
     }
 
+    // Notes: Type "/**" + enter to get the comment section under
+    /**
+     * This function extract a bearer token
+     *
+     * @param bearerToken
+     * @return String
+     */
     private String extractToken(String bearerToken) {
 
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
@@ -251,5 +328,27 @@ public class UserController {
 
         return null;
     }
+
+    private String generateToken(User _user){
+
+        // Get User roles
+        List<Role> roles = roleUserRepository.findByUserId(_user);
+
+        String rol = "";
+
+        for( Role r : roles){
+
+            rol += r.getNameCode();
+        }
+
+        // Expiration Date
+        String expDate = LocalDate.parse(LocalDate.now().toString()).plusDays(7).toString();
+
+        // Encode token
+        String info = _user.getEmail() + " "  + rol +  " "  + _user.getPassword() + " " + expDate;
+
+        return Base64.getEncoder().encodeToString(info.getBytes());
+    }
+
 
 }
