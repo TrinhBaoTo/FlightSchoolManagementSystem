@@ -137,13 +137,10 @@ public class UserController {
 
     // GET: user sign in
     @GetMapping("/users/signin")
-    public ResponseEntity<String> signInUser(@RequestHeader("Authorization") String bearerToken, @RequestParam String email,
-                                            @RequestParam String password) {
+    public ResponseEntity<String> signInUser(@RequestParam String email, @RequestParam String password) {
 
         // Get user by email
         User _user = userRepository.findByEmail(email);
-
-        String token = extractToken(bearerToken);
 
         // check if password and token para the same with _user
         boolean verified = _user.getPassword().equals(password);
@@ -152,6 +149,8 @@ public class UserController {
         if(verified){
 
             String rememberToken = generateToken(_user);
+            _user.setRememberToken(rememberToken);
+            userRepository.save(_user);
 
             // Notes - Good Practice
             //   SHOULD NOT have password in token
@@ -159,7 +158,7 @@ public class UserController {
             // Redirect user
             return ResponseEntity.status(HttpStatus.TEMPORARY_REDIRECT)
                     .header("Location", "https://th.bing.com/th/id/R.4d0233614a2e3260c53e9fde40af2ffb?rik=3EhR%2bPxrPIHYMg&pid=ImgRaw&r=0")
-                        .body("Sign In Success - redirect to homepage");
+                        .body("Sign In Success - " + rememberToken);
         }else{
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Sign In Failed");
@@ -174,15 +173,17 @@ public class UserController {
 
             User _user = userRepository.findByEmail(email);
 
-            if(checkUser(_user, bearerToken)){
+            String token = extractToken(bearerToken);
 
-                String token = "";
+            if(checkUser(_user, token)){
+
+                token = "";
 
                 _user.setRememberToken(token);
                 userRepository.save(_user);
 
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body("Sign Out");
+                        .body("Sign Out Success");
             }else{
 
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -256,7 +257,7 @@ public class UserController {
 
         try{
 
-            // Get user by email taken from token
+            // Get user by email
             User _user = userRepository.findByEmail(email);
 
             // Authenticate the user
@@ -311,6 +312,27 @@ public class UserController {
         return verified;
     }
 
+    private String generateToken(User _user){
+
+        // Get User roles
+        List<RoleUser> roleusers = roleUserRepository.findByUser(_user);
+
+        String rol = "";
+
+        for( RoleUser ru : roleusers){
+
+            rol = rol + ru.getRole().getNameCode();
+        }
+
+        // Expiration Date
+        String expDate = LocalDate.parse(LocalDate.now().toString()).plusDays(7).toString();
+
+        // Encode token
+        String info = _user.getEmail() + " "  + rol +  " "  + _user.getPassword() + " " + expDate;
+
+        return Base64.getEncoder().encodeToString(info.getBytes());
+    }
+
     // Notes: Type "/**" + enter to get the comment section under
     /**
      * This function extract a bearer token
@@ -328,27 +350,4 @@ public class UserController {
 
         return null;
     }
-
-    private String generateToken(User _user){
-
-        // Get User roles
-        List<Role> roles = roleUserRepository.findByUserId(_user);
-
-        String rol = "";
-
-        for( Role r : roles){
-
-            rol += r.getNameCode();
-        }
-
-        // Expiration Date
-        String expDate = LocalDate.parse(LocalDate.now().toString()).plusDays(7).toString();
-
-        // Encode token
-        String info = _user.getEmail() + " "  + rol +  " "  + _user.getPassword() + " " + expDate;
-
-        return Base64.getEncoder().encodeToString(info.getBytes());
-    }
-
-
 }

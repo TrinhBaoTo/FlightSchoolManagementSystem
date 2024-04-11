@@ -29,8 +29,8 @@ public class RoleController {
         try {
             List<Role> roles = new ArrayList<>();
 
-            if (id == null){
-                roles.addAll(roleRepository.findAll());
+            if (id == -1){
+                roles = roleRepository.findAll();
 
             } else{
                 roleRepository.findById(id).ifPresent(roles::add);
