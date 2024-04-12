@@ -43,6 +43,8 @@ public class UserController {
     @Autowired
     CertificateRepository certificateRepository;
 
+    private String verfCode = "";
+
     // GET to retrieve all or user by email
     @GetMapping("/users")
     @JsonIgnore
@@ -148,9 +150,7 @@ public class UserController {
         // If user is verified,
         if(verified){
 
-            String rememberToken = generateToken(_user);
-            _user.setRememberToken(rememberToken);
-            userRepository.save(_user);
+            String rememberToken = tokenGenerator(_user);
 
             // Notes - Good Practice
             //   SHOULD NOT have password in token
@@ -158,7 +158,7 @@ public class UserController {
             // Redirect user
             return ResponseEntity.status(HttpStatus.TEMPORARY_REDIRECT)
                     .header("Location", "https://th.bing.com/th/id/R.4d0233614a2e3260c53e9fde40af2ffb?rik=3EhR%2bPxrPIHYMg&pid=ImgRaw&r=0")
-                        .body("Sign In Success - " + rememberToken);
+                    .body("Sign In Success - " + rememberToken);
         }else{
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Sign In Failed");
@@ -252,7 +252,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/users/resetpassword")
+    @PostMapping ("/users/resetpassword")
     public ResponseEntity<String> resetPassword( @RequestParam String email) {
 
         try{
@@ -260,14 +260,50 @@ public class UserController {
             // Get user by email
             User _user = userRepository.findByEmail(email);
 
-            // Authenticate the user
+            // Send the user
             if(_user != null){
 
-                return new ResponseEntity<>("", HttpStatus.OK);
+                verfCode = getRandomNumberString();
+
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body("Send Verification Code to User Email - " + verfCode);
 
             }else{
 
-                return new ResponseEntity<>("User Not Found/ Not Verified", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("User Not Found", HttpStatus.BAD_REQUEST);
+            }
+
+        } catch (Exception e) {
+
+            log.error(e.getMessage());
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/users/checkverification")
+    public ResponseEntity<String> checkVerification( @RequestParam String email, @RequestParam String newPassword, @RequestParam String verificationCode) {
+
+        try{
+
+            // Get user by email
+            User _user = userRepository.findByEmail(email);
+
+            // Send the user
+            if(_user != null && verificationCode.equals(verfCode)){
+
+                _user.setPassword(newPassword);
+                userRepository.save(_user);
+
+                tokenGenerator(_user);
+
+                verfCode = "";
+
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body("Password Reset Successfully");
+
+            }else{
+
+                return new ResponseEntity<>("Failed to Verified", HttpStatus.BAD_REQUEST);
             }
 
         } catch (Exception e) {
@@ -304,15 +340,14 @@ public class UserController {
 
             if(expDate.isBefore(LocalDate.now())){
 
-                _user.setRememberToken(generateToken(_user));
-                userRepository.save(_user);
+                tokenGenerator(_user);
             }
         }
 
         return verified;
     }
 
-    private String generateToken(User _user){
+    private String tokenGenerator(User _user){
 
         // Get User roles
         List<RoleUser> roleusers = roleUserRepository.findByUser(_user);
@@ -330,7 +365,20 @@ public class UserController {
         // Encode token
         String info = _user.getEmail() + " "  + rol +  " "  + _user.getPassword() + " " + expDate;
 
-        return Base64.getEncoder().encodeToString(info.getBytes());
+        String rememberToken = Base64.getEncoder().encodeToString(info.getBytes());
+        _user.setRememberToken(rememberToken);
+        userRepository.save(_user);
+
+        return rememberToken;
+    }
+
+    public static String getRandomNumberString() {
+        // Generate a 6-digit random number from 0 to 999999
+        Random rnd = new Random();
+        int number = rnd.nextInt(999999);
+
+        // Convert the number to a 6-character string by padding with leading zeros
+        return String.format("%06d", number);
     }
 
     // Notes: Type "/**" + enter to get the comment section under
