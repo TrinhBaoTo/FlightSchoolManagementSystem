@@ -1,7 +1,6 @@
 package com.example.FlightSchoolManagement.controller;
 
 import com.example.FlightSchoolManagement.entity.Certificate;
-import com.example.FlightSchoolManagement.entity.Role;
 import com.example.FlightSchoolManagement.entity.RoleUser;
 import com.example.FlightSchoolManagement.entity.User;
 
@@ -157,7 +156,6 @@ public class UserController {
 
             // Redirect user
             return ResponseEntity.status(HttpStatus.TEMPORARY_REDIRECT)
-                    .header("Location", "https://th.bing.com/th/id/R.4d0233614a2e3260c53e9fde40af2ffb?rik=3EhR%2bPxrPIHYMg&pid=ImgRaw&r=0")
                     .body("Sign In Success - " + rememberToken);
         }else{
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
