@@ -26,6 +26,7 @@ public class AirportController {
     @GetMapping("/airports")
     public ResponseEntity<List<Airport>> getAllAirport(@RequestParam(required = false) String codeIata) {
         try {
+
             List<Airport> airports = new ArrayList<>();
 
             if (codeIata != null){

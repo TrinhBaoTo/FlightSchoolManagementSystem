@@ -16,7 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.time.Instant;
 import java.util.Date;
@@ -144,7 +144,7 @@ public class UserController {
         User _user = userRepository.findByEmail(email);
 
         // check if password and token para the same with _user
-        boolean verified = _user.getPassword().equals(password);
+        boolean verified = _user != null && _user.getPassword().equals(password);
 
         // If user is verified,
         if(verified){
@@ -157,7 +157,9 @@ public class UserController {
             // Redirect user
             return ResponseEntity.status(HttpStatus.TEMPORARY_REDIRECT)
                     .body("Sign In Success - " + rememberToken);
+
         }else{
+
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Sign In Failed");
         }
@@ -219,6 +221,7 @@ public class UserController {
             // Authenticate the user
             if(_user != null && checkUser(_user, token)){
 
+                // Notes: change updatedAt
                 // Update information
                 if(!firstName.isEmpty()){
                     _user.setFirstName(firstName);
@@ -293,6 +296,7 @@ public class UserController {
                 userRepository.save(_user);
 
                 tokenGenerator(_user);
+                // Notes: change updatedAt
 
                 verfCode = "";
 
@@ -334,9 +338,9 @@ public class UserController {
             }
 
             // Check Token Expiration Date
-            LocalDate expDate = LocalDate.parse(info[3]);
+            LocalDateTime expDate = LocalDateTime.parse(info[3]);
 
-            if(expDate.isBefore(LocalDate.now())){
+            if(expDate.isBefore(LocalDateTime.now())){
 
                 tokenGenerator(_user);
             }
@@ -358,7 +362,8 @@ public class UserController {
         }
 
         // Expiration Date
-        String expDate = LocalDate.parse(LocalDate.now().toString()).plusDays(7).toString();
+        // Notes: add time (Date Time)
+        String expDate = LocalDateTime.parse(LocalDateTime.now().toString()).plusDays(7).toString();
 
         // Encode token
         String info = _user.getEmail() + " "  + rol +  " "  + _user.getPassword() + " " + expDate;

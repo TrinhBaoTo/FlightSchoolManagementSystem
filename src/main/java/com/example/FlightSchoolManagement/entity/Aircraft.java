@@ -18,6 +18,7 @@ public class Aircraft {
     @Column(name = "id")
     private int id;
 
+    @NonNull
     @Column(name = "registration_number", nullable = false)
     private int registrationNumber;
 
@@ -30,6 +31,7 @@ public class Aircraft {
     @JoinColumn(name = "manufacturer_id", nullable = false)
     private Manufacturer manufacturer;
 
+    @NonNull
     @Column(name = "year_manufactured", nullable = false)
     private int yearManufactured;
 
@@ -37,9 +39,11 @@ public class Aircraft {
     @Column(name = "purchase_date", nullable = false)
     private Date purchaseDate;
 
+    @NonNull
     @Column(name = "purchase_price", nullable = false)
     private double purchasePrice;
 
+    @NonNull
     @Column(name = "availability", nullable = false)
     private int availability;
 }
