@@ -27,6 +27,10 @@ public class User {
     @JsonManagedReference
     private Set<RoleUser> roleUser = new HashSet<>();
 
+    @OneToMany(mappedBy = "user")
+    @JsonManagedReference
+    private Set<LessonUser> lessonUser = new HashSet<>();
+
     @NonNull
     @Column(name = "first_name", nullable = false)
     private String firstName;

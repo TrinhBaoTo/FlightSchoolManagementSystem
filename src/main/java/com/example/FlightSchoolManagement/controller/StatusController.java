@@ -31,7 +31,7 @@ public class StatusController {
 
             List<Status> statuses = new ArrayList<>();
 
-            if (name != null){
+            if(name != null){
 
                 statuses = statusRepository.findAll();
 

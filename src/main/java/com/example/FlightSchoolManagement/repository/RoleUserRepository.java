@@ -1,6 +1,5 @@
 package com.example.FlightSchoolManagement.repository;
 
-import com.example.FlightSchoolManagement.entity.Role;
 import com.example.FlightSchoolManagement.entity.RoleUser;
 import com.example.FlightSchoolManagement.entity.RoleUserId;
 import com.example.FlightSchoolManagement.entity.User;

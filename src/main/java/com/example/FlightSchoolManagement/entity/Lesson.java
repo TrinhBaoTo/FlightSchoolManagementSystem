@@ -1,10 +1,13 @@
 package com.example.FlightSchoolManagement.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.sql.Time;
-import java.util.Date;
+import java.sql.Timestamp;
+import java.time.Duration;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Setter
@@ -17,7 +20,11 @@ public class Lesson {
     @Id
     @GeneratedValue
     @Column(name = "id")
-    private Long id;
+    private int id;
+
+    @OneToMany(mappedBy = "lesson")
+    @JsonManagedReference
+    private Set<LessonUser> lessonUser = new HashSet<>();
 
     @NonNull
     @Column(name = "lesson_name", nullable = false)
@@ -35,11 +42,11 @@ public class Lesson {
 
     @NonNull
     @Column(name = "duration", nullable = false)
-    private Time duration;
+    private Duration duration;
 
     @NonNull
-    @Column(name = "lesson_daate_time", nullable = false)
-    private Date lessonDateTime;
+    @Column(name = "lesson_date_time", nullable = false)
+    private Timestamp lessonDateTime;
 
     @NonNull
     @ManyToOne

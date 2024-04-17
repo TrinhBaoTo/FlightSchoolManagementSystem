@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -41,6 +43,9 @@ public class UserController {
 
     @Autowired
     CertificateRepository certificateRepository;
+
+    @Autowired
+    private JavaMailSender mailSender;
 
     private String verfCode = "";
 
@@ -167,15 +172,15 @@ public class UserController {
 
     // GET: user sign out
     @GetMapping("/users/signout")
-    public ResponseEntity<String> signOutUser(@RequestHeader("Authorization") String bearerToken, @RequestParam String email) {
+    public ResponseEntity<String> signOutUser(@RequestHeader("Authorization") String bearerToken) {
 
         try {
 
-            User _user = userRepository.findByEmail(email);
-
             String token = extractToken(bearerToken);
 
-            if(checkUser(_user, token)){
+            User _user = getUser(token);
+
+            if(checkUser(token)){
 
                 token = "";
 
@@ -206,35 +211,33 @@ public class UserController {
 
             String token = extractToken(bearerToken);
 
-            // Assume logged in when reach here
-            // Decode token
-            byte[] decodedBytes = Base64.getDecoder().decode(token);
-            String decodedToken = new String(decodedBytes);
-
-            String[] info = decodedToken.split(" ", 0);
-
             // Get user by email taken from token
-            User _user = userRepository.findByEmail(info[0]);
+            User _user = getUser(token);
 
             String update = "Update: ";
 
+            Date  updatedAt = Date.from(Instant.now());
+
             // Authenticate the user
-            if(_user != null && checkUser(_user, token)){
+            if(_user != null && checkUser(token)){
 
                 // Notes: change updatedAt
                 // Update information
                 if(!firstName.isEmpty()){
                     _user.setFirstName(firstName);
+                    _user.setUpdatedAt(updatedAt);
                     userRepository.save(_user);
                     update = update + "firstName ";
                 }
                 if(!lastName.isEmpty()){
                     _user.setLastName(lastName);
+                    _user.setUpdatedAt(updatedAt);
                     userRepository.save(_user);
                     update = update + "lastname ";
                 }
                 if(!phoneNumber.isEmpty()){
                     _user.setPhoneNumber(phoneNumber);
+                    _user.setUpdatedAt(updatedAt);
                     userRepository.save(_user);
                     update = update + "phoneNumber ";
                 }
@@ -266,6 +269,18 @@ public class UserController {
 
                 verfCode = getRandomNumberString();
 
+                String from = "zimsby@gmail.com";
+                String to = "zimsby@gmail.com";
+
+                SimpleMailMessage message = new SimpleMailMessage();
+
+                message.setFrom(from);
+                message.setTo(to);
+                message.setSubject("This is a plain text email");
+                message.setText(verfCode);
+
+                mailSender.send(message);
+
                 return ResponseEntity.status(HttpStatus.OK)
                         .body("Send Verification Code to User Email - " + verfCode);
 
@@ -282,7 +297,7 @@ public class UserController {
     }
 
     @PostMapping("/users/checkverification")
-    public ResponseEntity<String> checkVerification( @RequestParam String email, @RequestParam String newPassword, @RequestParam String verificationCode) {
+    public ResponseEntity<String> checkPasswordResetVerification( @RequestParam String email, @RequestParam String newPassword, @RequestParam String verificationCode) {
 
         try{
 
@@ -292,11 +307,13 @@ public class UserController {
             // Send the user
             if(_user != null && verificationCode.equals(verfCode)){
 
+                Date  updatedAt = Date.from(Instant.now());
+
                 _user.setPassword(newPassword);
+                _user.setUpdatedAt(updatedAt);
                 userRepository.save(_user);
 
                 tokenGenerator(_user);
-                // Notes: change updatedAt
 
                 verfCode = "";
 
@@ -315,7 +332,9 @@ public class UserController {
         }
     }
 
-    public boolean checkUser(User _user, String token) {
+    public boolean checkUser(String token) {
+
+        User _user = getUser(token);
 
         // check if password and token para the same with _user
         boolean verified = _user != null && _user.getRememberToken().equals(token);
@@ -342,11 +361,40 @@ public class UserController {
 
             if(expDate.isBefore(LocalDateTime.now())){
 
-                tokenGenerator(_user);
+                // tokenGenerator(_user);
+                verified = false;
             }
         }
 
         return verified;
+    }
+
+    public boolean checkRole(String r, User _user){
+
+        // Get User roles
+        List<RoleUser> roleusers = roleUserRepository.findByUser(_user);
+
+        for( RoleUser ru : roleusers){
+
+            if(ru.getRole().getNameCode().equals(r)){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public User getUser(String token){
+
+        // decode token
+        byte[] decodedBytes = Base64.getDecoder().decode(token);
+        String decodedToken = new String(decodedBytes);
+
+        String[] info = decodedToken.split(" ", 0);
+
+        User _user = userRepository.findByEmail(info[0]);
+
+        return _user;
     }
 
     private String tokenGenerator(User _user){
