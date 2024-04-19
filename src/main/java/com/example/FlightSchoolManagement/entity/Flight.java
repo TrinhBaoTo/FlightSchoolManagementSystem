@@ -3,7 +3,7 @@ package com.example.FlightSchoolManagement.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 @Entity
 @Setter
@@ -13,13 +13,29 @@ import java.util.Date;
 @RequiredArgsConstructor
 @Table(name = "flight")
 public class Flight {
+
     @Id
     @GeneratedValue
     @Column(name = "id")
     private int id;
 
+    @NonNull
     @Column(name = "flight_number", nullable = false)
     private int flightNumber;
+
+    @NonNull
+    @ManyToOne
+    @JoinColumn(name = "aircraft_id", nullable = false)
+    private Aircraft aircraft;
+
+    @NonNull
+    @ManyToOne
+    @JoinColumn(name = "instructor_id", nullable = false)
+    private User instructor;
+
+    @ManyToOne
+    @JoinColumn(name = "student_id", nullable = true)
+    private User student;
 
     @NonNull
     @ManyToOne
@@ -33,24 +49,11 @@ public class Flight {
 
     @NonNull
     @Column(name = "departure_date_time", nullable = false)
-    private Date departureDateTime;
+    private Timestamp departureDateTime;
 
     @NonNull
     @Column(name = "arrival_date_time", nullable = false)
-    private Date arrivalDateTime;
+    private Timestamp arrivalDateTime;
 
-    @NonNull
-    @ManyToOne
-    @JoinColumn(name = "aircraft_id", nullable = false)
-    private Aircraft aircraft;
 
-    @NonNull
-    @ManyToOne
-    @JoinColumn(name = "instructor_id", nullable = false)
-    private User instructor;
-
-    @NonNull
-    @ManyToOne
-    @JoinColumn(name = "student_id", nullable = false)
-    private User student;
 }

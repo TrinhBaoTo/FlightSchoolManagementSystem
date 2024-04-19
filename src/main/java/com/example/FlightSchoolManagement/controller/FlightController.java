@@ -11,18 +11,21 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import static java.time.LocalDate.now;
 
 @RestController
 @Log4j
-public class LessonController {
+public class FlightController {
 
     @Autowired
-    LessonRepository lessonRepository;
-
-    @Autowired
-    LessonUserRepository lessonUserRepository;
+    FlightRepository flightRepository;
 
     @Autowired
     UserController userController;
@@ -31,15 +34,14 @@ public class LessonController {
     AircraftRepository aircraftRepository;
 
     @Autowired
-    StatusRepository statusRepository;
+    AirportRepository airportRepository;
 
-
-    @GetMapping("/lessons")
-    public ResponseEntity<List<Lesson>> getLesson(@RequestHeader("Authorization") String bearerToken){
+    @GetMapping("/flights")
+    public ResponseEntity<List<Flight>> getLesson(@RequestHeader("Authorization") String bearerToken){
 
         try {
 
-            List<Lesson> lessons = new ArrayList<>();
+            List<Flight> flights = new ArrayList<>();
 
             String token = extractToken(bearerToken);
 
@@ -47,24 +49,19 @@ public class LessonController {
 
             if(userController.checkRole("I", _user)){
 
-                lessons = lessonRepository.findByInstructor(_user);
+                flights = flightRepository.findByInstructor(_user);
             }
 
             if(userController.checkRole("S", _user)){
 
-                List<LessonUser>_lessonUser = lessonUserRepository.findByUser(_user);
-
-                for( LessonUser lu : _lessonUser){
-
-                    lessons.add(lu.getLesson());
-                }
+                flights = flightRepository.findByStudent(_user);
             }
 
-            if (lessons.isEmpty()) {
+            if (flights.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
 
-            return new ResponseEntity<>(lessons, HttpStatus.OK);
+            return new ResponseEntity<>(flights, HttpStatus.OK);
 
         } catch (Exception e) {
 
@@ -72,9 +69,8 @@ public class LessonController {
         }
     }
 
-
-    @GetMapping("/lessons/available")
-    public ResponseEntity<List<Lesson>> getAvailableLesson(@RequestHeader("Authorization") String bearerToken, @RequestParam String lessonName) {
+    @GetMapping("/flights/available")
+    public ResponseEntity<List<Flight>> getAvailableLesson(@RequestHeader("Authorization") String bearerToken) {
 
         try {
 
@@ -82,23 +78,15 @@ public class LessonController {
 
             if(userController.checkUser(token)){
 
-                List<Lesson> lessons = new ArrayList<>();
+                List<Flight> flights = new ArrayList<>();
 
-                if(!lessonName.isEmpty()){
+                flights = flightRepository.findAll();
 
-                    Status s = statusRepository.findByName("Scheduled");
-                    lessons = lessonRepository.findByLessonName(lessonName);
+                flights.removeIf(f -> f.getDepartureDateTime().before(Date.from(Instant.now())));
 
-                    for(Lesson l : lessons){
+                flights.removeIf(f -> f.getStudent()!=null);
 
-                        if(l.getStatus()!=s){
-                            lessons.remove(l);
-                        }
-                    }
-                }
-
-                return new ResponseEntity<>(lessons, HttpStatus.OK);
-
+                return new ResponseEntity<>(flights, HttpStatus.OK);
             }
 
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
@@ -109,10 +97,11 @@ public class LessonController {
         }
     }
 
-    @PostMapping("/lesson/instructor")
-    public ResponseEntity<Lesson> addLessonAsSInstructor(@RequestHeader("Authorization") String bearerToken,
-                                                         @RequestParam String lessonName, @RequestParam int aircraftRegNum,
-                                                         @RequestParam String durationStr, @RequestParam String lessonDateTime, @RequestParam String notes) {
+    @PostMapping("/flight/instructor")
+    public ResponseEntity<Flight> addLessonAsSInstructor(@RequestHeader("Authorization") String bearerToken,
+                                                         @RequestParam int flightNumber, @RequestParam int aircraftRegNum,
+                                                         @RequestParam String departureA, @RequestParam String arrivalA,
+                                                         @RequestParam String departureDateTime, @RequestParam String arrivalDateTime) {
 
         try {
 
@@ -125,14 +114,15 @@ public class LessonController {
 
                 Aircraft _aircraft = aircraftRepository.findByRegistrationNumber(aircraftRegNum);
 
-                Duration duration = Duration.parse(durationStr);
+                Airport _departure = airportRepository.findByCodeIata(departureA);
+                Airport _arrival = airportRepository.findByCodeIata(arrivalA);
 
-                Lesson _lesson = new Lesson(lessonName, _user, _aircraft, duration,
-                                            Timestamp.valueOf(lessonDateTime), statusRepository.findByName("Scheduled"), notes);
+                Flight _flight = new Flight(flightNumber, _aircraft, _user, _departure, _arrival,
+                        Timestamp.valueOf(departureDateTime), Timestamp.valueOf(arrivalDateTime));
 
-                lessonRepository.save(_lesson);
+                flightRepository.save(_flight);
 
-                return new ResponseEntity<>(_lesson, HttpStatus.OK);
+                return new ResponseEntity<>(_flight, HttpStatus.OK);
 
             }else{
 
@@ -144,9 +134,9 @@ public class LessonController {
         }
     }
 
-    @PostMapping("/lesson/student")
+    @PostMapping("/flight/student")
     public ResponseEntity<String> addLessonAsStudent(@RequestHeader("Authorization") String bearerToken,
-                                                     @RequestParam int lessonId) {
+                                                     @RequestParam int flightNumber) {
 
         try {
 
@@ -157,10 +147,13 @@ public class LessonController {
             // check if user is an instructor
             if (userController.checkUser(token) && userController.checkRole("S", _user)) {
 
-                LessonUser _lessonUser = new LessonUser(userController.getUser(token),lessonRepository.findById(lessonId));
-                lessonUserRepository.save(_lessonUser);
+                Flight _flight = flightRepository.findByFlightNumber(flightNumber);
 
-                return new ResponseEntity<>("Lesson Added for Student", HttpStatus.OK);
+                _flight.setStudent(_user);
+
+                flightRepository.save(_flight);
+
+                return new ResponseEntity<>("Flight Added for Student", HttpStatus.OK);
 
             }else{
 
